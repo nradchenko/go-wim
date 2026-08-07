@@ -436,7 +436,9 @@ func (w *Writer) compressResource(data []byte) (body []byte, smaller bool) {
 	chunk := w.opts.chunk()
 	nchunks := (len(data) + chunk - 1) / chunk
 	entry := 4
-	if len(data) > 0xffffffff {
+	// Compared as uint64: on a 32-bit build the constant does not fit in an int, and this
+	// package would not compile at all — which is how it stayed unnoticed.
+	if uint64(len(data)) > 0xffffffff {
 		entry = 8
 	}
 
