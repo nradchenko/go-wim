@@ -1,0 +1,3 @@
+# Test binaries left behind by `go test -cpuprofile` and friends.
+*.test
+*.prof

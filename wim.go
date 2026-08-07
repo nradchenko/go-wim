@@ -1,15 +1,22 @@
 // Copyright 2026 Nikita Radchenko
 // SPDX-License-Identifier: MIT
 
-// Package wim writes Windows Imaging (.wim) files.
+// Package wim reads and writes Windows Imaging (.wim) files.
 //
-// It captures a file tree into a WIM: walking the tree, deduplicating streams by SHA-1, and
+// Writing captures a file tree into a WIM: walking the tree, deduplicating streams by SHA-1, and
 // emitting the dentry tree, the security table, the blob table, and the XML — with no external
 // imaging tool involved. Resources are stored uncompressed or LZX-compressed; the codec lives
 // in the lzx subpackage and is usable on its own.
 //
-// The package writes; it does not read. Enough of the format is parsed internally to place what
-// it emits, and the tests parse the output back, but there is no reader API.
+// Reading goes the other way and presents an image as an [io/fs.FS]:
+//
+//	rd, err := wim.Open(f, size)
+//	im, err := rd.Boot()
+//	data, err := fs.ReadFile(im.FS(), "windows/system32/ntoskrnl.exe")
+//
+// so anything already written against a filesystem works against a WIM unchanged. Reads are
+// served from the chunks they touch rather than by expanding the image, which is what makes
+// listing one cheap and reading one file out of a large one cheaper still.
 //
 // Two properties of the format are load-bearing and easy to get wrong, and this package refuses
 // rather than lets you discover them at boot. A loader takes the metadata resource's compression
@@ -18,6 +25,11 @@
 // produces an image Windows will not boot. And every dentry needs a security ID: an image whose
 // dentries carry -1, which is what a POSIX capture naturally produces, is rejected at mount,
 // which is why Options.Security has no default.
+//
+// Both of those constrain what is written. The reader is deliberately more permissive: it takes
+// each resource's storage from that resource's own flag, so it reads images a loader would
+// refuse. A WIM this package reads is therefore not necessarily one Windows will boot — writing
+// it here is what makes it that.
 package wim
 
 import (
