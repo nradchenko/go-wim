@@ -183,22 +183,51 @@ changes only how long a capture takes.
 
 ## Testing
 
-There is **no CI** yet. The suite runs locally and is worth running:
+CI runs these on every push to `main` and every pull request:
 
 ```sh
-go test ./...          # round trips against an independent reader
-go test -race ./...    # the parallel compression path
+go build ./...
+go vet ./...
+go test ./...          # round trips, fs.FS conformance, rejection of damaged images
+golangci-lint run      # configured by .golangci.yml
 ```
 
-Coverage leans on implementations that share no code with this one:
+Worth running locally as well, and not run by CI:
+
+```sh
+go test -race ./...    # the parallel compression path, and the reader's shared state
+```
+
+Coverage leans on implementations that share no code with this one, because a round trip only
+proves this package agrees with itself:
 
 - **go-winio's WIM parser** reads back what the writer produces — no external tool needed, so
   this runs anywhere.
 - **wimlib**, when `wimcapture`/`wimapply`/`wimlib-imagex` are on `PATH`, verifies every
-  resource's SHA-1 and round-trips an image back to a tree. Tests skip cleanly without it.
-- Two environment-gated sweeps for bulk validation: `GOWIM_CORPUS=<dir of .wim files>`
-  decodes every resource in a corpus and checks it against its recorded hash, and
-  `GOWIM_LZX_CORPUS=<dir>` measures the compressor's ratio and throughput against real files.
+  resource's SHA-1 and round-trips an image back to a tree. For the reader it is the differential
+  oracle: every file extracted from a real image is byte-compared against wimlib's extraction of
+  the same image. Tests skip cleanly without it.
+- The reader also runs the standard library's own `fstest.TestFS` conformance suite, and a set of
+  deliberately damaged images — each corrupted in exactly one way, each asserting which kind of
+  failure is reported rather than merely that one is.
+
+Environment-gated sweeps, for bulk validation against images that cannot be committed. Each takes
+one or more directories, separated as `PATH` is (`:` on Unix). These run under `go test`:
+
+| variable | what it does |
+|---|---|
+| `GOWIM_WIM_CORPUS=<dir>[:<dir>…]` | reads every WIM found there; with wimlib on `PATH`, byte-compares every extracted file against wimlib's extraction of the same image, and without it only checks that each image parses |
+| `GOWIM_CORPUS=<dir>` | decodes every resource in a corpus and checks it against its recorded hash |
+| `GOWIM_LZX_CORPUS=<dir>` | measures the compressor's ratio and throughput against real files |
+| `GOWIM_LZX_BASELINE=<n>` | with the above, prints the delta against a previous run's total |
+
+And these gate benchmarks, so they need `go test -bench`, not `go test` alone:
+
+| variable | what it does |
+|---|---|
+| `GOWIM_CAPTURE_DIR=<dir>` | captures a tree, for comparison against another imaging tool |
+| `GOWIM_CAPTURE_THREADS=1` | with the above, captures single-threaded |
+| `GOWIM_WIM_CORPUS=<dir>[:<dir>…]` | also drives the decode-throughput benchmarks |
 
 ## Compression
 

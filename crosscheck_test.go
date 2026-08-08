@@ -6,6 +6,7 @@ package wim
 import (
 	"io/fs"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 	"time"
@@ -33,8 +34,11 @@ import (
 // it against what this package reads. It opens the WIM as a file rather than a byte slice, so the
 // io.ReaderAt path is what gets exercised on a real image.
 func TestCrossCheckAgainstWimlib(t *testing.T) {
-	if _, err := os.Stat("/usr/bin/wimlib-imagex"); err != nil {
-		t.Skip("wimlib-imagex is not installed")
+	// Looked up on PATH rather than at a fixed location: an absolute path is right on one
+	// distribution and wrong everywhere else, and the failure is silent — the strongest test
+	// here would skip itself on a machine that has wimlib installed somewhere else.
+	if _, err := exec.LookPath("wimlib-imagex"); err != nil {
+		t.Skip("wimlib-imagex not available; skipping")
 	}
 	for _, p := range realWIMFixtures(t) {
 		t.Run(filepath.Base(p), func(t *testing.T) {

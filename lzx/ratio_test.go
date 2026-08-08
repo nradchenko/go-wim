@@ -16,7 +16,7 @@ import (
 // as the writer does, and reports the ratio and throughput. It is the feedback loop for parse
 // changes: a change that does not move this number is not worth its complexity.
 //
-//	GOWIM_LZX_CORPUS=<dir> go test -run TestRatio ./internal/wim/lzx/ -v
+//	GOWIM_LZX_CORPUS=<dir> go test -run TestRatio ./lzx/ -v
 //
 // Set GOWIM_LZX_BASELINE to a previous run's total to print the delta directly.
 func TestRatio(t *testing.T) {
