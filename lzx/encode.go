@@ -262,10 +262,10 @@ func (c *Compressor) longestMatch(data []byte, pos int, recent [3]uint32) (lengt
 	return length, offset
 }
 
-// matchLen returns how many bytes agree between the strings at a and b, capped at max.
-func matchLen(data []byte, a, b, max int) int {
+// matchLen returns how many bytes agree between the strings at a and b, capped at limit.
+func matchLen(data []byte, a, b, limit int) int {
 	n := 0
-	for n < max && data[a+n] == data[b+n] {
+	for n < limit && data[a+n] == data[b+n] {
 		n++
 	}
 	return n

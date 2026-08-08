@@ -438,7 +438,7 @@ func lzxCaptureFixture() fstest.MapFS {
 	src := fixture()
 	text := make([]byte, 200000)
 	for i := range text {
-		text[i] = byte("the quick brown fox jumps over the lazy dog "[i%43])
+		text[i] = "the quick brown fox jumps over the lazy dog "[i%43]
 	}
 	src["windows/system32/big.txt"] = &fstest.MapFile{Data: text}
 

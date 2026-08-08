@@ -38,6 +38,7 @@ type WindowsInfo struct {
 // PROCESSOR_ARCHITECTURE numbering.
 type Arch int
 
+// The architectures a WIM of this vintage records.
 const (
 	ArchIntel Arch = 0 // x86
 	ArchAMD64 Arch = 9 // x64

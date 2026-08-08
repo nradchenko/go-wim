@@ -76,7 +76,7 @@ func ExampleCapture() {
 
 // Give different files different descriptors.
 func ExampleSecurityFunc() {
-	security := func(path string, d fs.DirEntry) []byte {
+	security := func(_ string, d fs.DirEntry) []byte {
 		if d.IsDir() {
 			return directoryDescriptor
 		}
@@ -91,7 +91,7 @@ var directoryDescriptor = descriptor
 func ExampleCompressor() {
 	data := make([]byte, 4096)
 	for i := range data {
-		data[i] = byte("the quick brown fox "[i%20])
+		data[i] = "the quick brown fox "[i%20]
 	}
 
 	packed := make([]byte, len(data))

@@ -160,7 +160,7 @@ func lzxFixture(t *testing.T) string {
 
 	repetitive := make([]byte, 100000)
 	for i := range repetitive {
-		repetitive[i] = byte("the quick brown fox "[i%20])
+		repetitive[i] = "the quick brown fox "[i%20]
 	}
 	write("repetitive.txt", repetitive)
 
