@@ -5,16 +5,16 @@
 // directions: a compressor for building WIMs and a decompressor the round-trip tests check it
 // against.
 //
-// The WIM variant differs from the cabinet variant in compress/lzx.go, and the two do not
-// share code: a WIM chunk is a self-contained stream over a fixed 32768-byte window, opening
+// The WIM variant differs from the cabinet (CAB) variant, and the two do not share code: a WIM
+// chunk is a self-contained stream over a fixed 32768-byte window, opening
 // directly at a block header — there is no cabinet-style file preamble, the block size is a
 // 1-bit "full window" flag or a 16-bit count rather than a 24-bit field, and the Intel E8
 // call translation is unconditional at a fixed magic file size rather than negotiated.
 //
 // Reimplemented from the documented LZX format, with the MIT-licensed go-winio WIM reader
 // (github.com/microsoft/go-winio, wim/lzx, Copyright (c) 2015 Microsoft) consulted as a format
-// reference only; no go-winio source is incorporated. The same reference and the same standing
-// as compress/lzx.go and pe-wimmf's reader/lzx.c, which independently agree on this framing.
+// reference only; no go-winio source is incorporated. Independent implementations of this codec
+// agree on the framing described above.
 package lzx
 
 import "errors"
